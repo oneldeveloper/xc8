@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-enum switch_status { SWITCH_RELEASED = 0, SWITCH_PRESSED = 1};
+enum switch_statuses { SWITCH_RELEASED = 0, SWITCH_PRESSED = 1};
 
 union _switch_flags {
     struct{
@@ -30,36 +30,36 @@ union _switch_flags {
 struct _switch_context
 {
 	uint8_t physical_status;
-	float second_function_time_ms;
-    float repeat_time_ms;
+	float second_function_time_elapsed;
+    float repeat_time_elapsed;
     union _switch_flags flags;
 };
 
 
 
 
-typedef struct switch_functions_struct
+struct _switch_functions
 {
-    uint8_t(*p_get_state)(void);
+    enum switch_statuses (*p_get_state)(void);
 	void(*p_r_edge_callback)(void);
 	void(*p_f_edge_callback)(void);
     void(*p_pressed_state_callback)(void);
 	void(*p_r_edge_second_function_callback)(void);
 	void(*p_f_edge_second_function_callback)(void);
-} switch_functions_t;
+};
 
-typedef struct switch_parameters 
+struct _switch_parameters 
 {
-	uint16_t ms_per_scan;
-	float second_function_time_ms;
-    float repeat_time_ms;
+	uint16_t scan_time;
+	float second_function_time;
+    float repeat_time;
     bool autorepeat_state; 
-} switch_parameters_t;
+} ;
 
 
-void switch_initialize(struct _switch_context  *context, switch_parameters_t *parameters, switch_functions_t *functions);
+void switch_initialize(struct _switch_context  *context, struct _switch_parameters *parameters, struct _switch_functions *functions);
 
-void switch_scan(struct _switch_context  *context, switch_parameters_t *parameters, switch_functions_t *functions);
+void switch_scan(struct _switch_context  *context, struct _switch_parameters *parameters, struct _switch_functions *functions);
 
 #endif	/* ONEL_AUTOMATION_SWITCH_H */
 

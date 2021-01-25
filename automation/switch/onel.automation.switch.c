@@ -5,7 +5,7 @@
 
 
 
-void switch_scan(struct _switch_context  *context, switch_parameters_t *parameters, switch_functions_t *functions)
+void switch_scan(struct _switch_context  *context, struct _switch_parameters *parameters, struct _switch_functions *functions)
 {
 	uint8_t state = functions->p_get_state();
 	if(state == SWITCH_PRESSED)
@@ -13,31 +13,31 @@ void switch_scan(struct _switch_context  *context, switch_parameters_t *paramete
 		if(!context->flags.pressed_callback_done)
 		{
 			context->flags.pressed_callback_done = true;
-			context->repeat_time_ms = 0;
+			context->repeat_time_elapsed = 0;
 			if(functions->p_pressed_state_callback != 0)
 				functions->p_pressed_state_callback();			
 		}
 		else if (parameters->autorepeat_state)
 		{
-		if(context->repeat_time_ms > parameters->repeat_time_ms)
+		if(context->repeat_time_elapsed > parameters->repeat_time)
 		{
-			context->repeat_time_ms = 0;
+			context->repeat_time_elapsed = 0;
 			if(functions->p_pressed_state_callback != 0)
 				functions->p_pressed_state_callback();
 		}
 		else
-			context->repeat_time_ms += parameters->ms_per_scan;
+			context->repeat_time_elapsed += parameters->scan_time;
 		}
 	}
 	else
 	{
-		context->repeat_time_ms = 0;
+		context->repeat_time_elapsed = 0;
 		context->flags.pressed_callback_done = false;
 	}
 	if(context->physical_status ^ state)
 	{
 		context->flags.r_edge_second_function_done = false;
-		context->second_function_time_ms = 0;
+		context->second_function_time_elapsed = 0;
 		if (state == SWITCH_PRESSED)			
 		{
 			if (functions->p_r_edge_callback != 0)
@@ -51,7 +51,7 @@ void switch_scan(struct _switch_context  *context, switch_parameters_t *paramete
 	}
 	else
 	{		
-		if(context->second_function_time_ms > parameters->second_function_time_ms)
+		if(context->second_function_time_elapsed > parameters->second_function_time)
 		{
 			if (state == SWITCH_PRESSED && !context->flags.r_edge_second_function_done)
 			{
@@ -62,14 +62,14 @@ void switch_scan(struct _switch_context  *context, switch_parameters_t *paramete
 
 		}
 		else
-			context->second_function_time_ms += parameters->ms_per_scan;
+			context->second_function_time_elapsed += parameters->scan_time;
 	}
 
 	context->physical_status = state;
 }
 
-void switch_initialize(struct _switch_context  *context, switch_parameters_t *parameters, switch_functions_t *functions)
+void switch_initialize(struct _switch_context  *context, struct _switch_parameters *parameters, struct _switch_functions *functions)
 {
 	context->flags.r_edge_second_function_done = 0;
-	context->second_function_time_ms = 0;
+	context->second_function_time_elapsed = 0;
 }
